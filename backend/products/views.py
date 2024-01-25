@@ -3,6 +3,25 @@ from rest_framework import generics
 from .models import Product
 from .serializers import ProductSerializer
 
+
+
+# LIST CREATE VIEW NOT ONLY LISTS ALL INSTANCES STORED IN DATABASE, ALSO CREATES A MODEL INSTANCE & SERIALIZER INSTANCE
+class ProductListCreateAPIViews(generics.ListCreateAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer 
+
+    # specific method for CreateAPIView
+    def perform_create(self, serializer):
+        # serializer.save(user=self.request.user) # if have user, to create serializer instance
+        # print(serializer.validated_data) # prints the validated data inputs
+        title = serializer.validated_data.get('title')
+        content = serializer.validated_data.get('content') or None 
+        if not content:
+            content = title 
+        serializer.save(content=content)
+        # serializer.save()
+        # can also send a Django signal
+
 # CREATE VIEW CREATES A MODEL INSTANCE & SERIALIZER INSTANCE
 class ProductCreateAPIViews(generics.CreateAPIView):
     queryset = Product.objects.all()
@@ -30,3 +49,8 @@ class ProductDetailAPIView(generics.RetrieveAPIView):
     # def def get_queryset(self):
     #     return super().get_queryset()
     
+
+# # NOT GOING TO USE THIS METHOD
+# class ProductListAPIView(generics.ListAPIView):
+#     queryset = Product.objects.all()
+#     serializer_class = ProductSerializer
