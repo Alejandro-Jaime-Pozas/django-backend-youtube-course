@@ -48,10 +48,27 @@ class ProductDetailAPIView(generics.RetrieveAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer # serializer_class is installed package in rest_framework
     # lookup_field = 'pk'
-
     # # to get a custom queryset 
     # def def get_queryset(self):
     #     return super().get_queryset()
+
+class ProductUpdateAPIView(generics.UpdateAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer # serializer_class is installed package in rest_framework
+    lookup_field = 'pk' # lookup_field included in UpdateAPIView
+
+    # 
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        if not instance.content:
+            instance.content = instance.title 
+            ###
+
+
+class ProductDeleteAPIView(generics.RetrieveAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer # serializer_class is installed package in rest_framework
+    # lookup_field = 'pk'
     
 
 # # NOT GOING TO USE THIS METHOD
