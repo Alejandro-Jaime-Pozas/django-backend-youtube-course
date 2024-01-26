@@ -65,11 +65,14 @@ class ProductUpdateAPIView(generics.UpdateAPIView):
             ###
 
 
-class ProductDeleteAPIView(generics.RetrieveAPIView):
+class ProductDeleteAPIView(generics.DestroyAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer # serializer_class is installed package in rest_framework
-    # lookup_field = 'pk'
+    lookup_field = 'pk'
     
+    def perform_destroy(self, instance): # destroy inputs the instance itself, not the serializer
+        # instance
+        super().perform_destroy(instance) # this is the code that performs the instance delete
 
 # # NOT GOING TO USE THIS METHOD
 # class ProductListAPIView(generics.ListAPIView):
