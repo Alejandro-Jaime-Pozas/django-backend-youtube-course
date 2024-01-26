@@ -1,4 +1,4 @@
-from rest_framework import generics
+from rest_framework import generics, mixins
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
@@ -78,7 +78,30 @@ class ProductDeleteAPIView(generics.DestroyAPIView):
 # class ProductListAPIView(generics.ListAPIView):
 #     queryset = Product.objects.all()
 #     serializer_class = ProductSerializer
-    
+
+
+# mixin views allow for access to additional methods built-in to mixins that are otherwise unavailable
+class ProductMixinView(
+    mixins.ListModelMixin, # for handling get list
+    mixins.RetrieveModelMixin, # for handling get 1 item
+    mixins.CreateModelMixin, # for creating get 1 item
+    generics.GenericAPIView
+    ):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+    lookup_field = 'pk' # the ListModelMixin doesn't use this field
+
+    # for mixins, you can change this from get to post and still works
+    def get(self, request, *args, **kwargs):
+        print(args, kwargs)
+        pk = kwargs.get('pk')
+        if pk is not None:
+            return self.retrieve(request, *args, **kwargs) # will change what this mixin responds with (retrieve is a RetrieveModelMixin method)
+        return self.list(request, *args, **kwargs) # this list method comes directly from ListModelMixin
+
+    def post(self, request, *args, **kwargs): #http >> POST
+        return self.create(request, *args, **kwargs)
+
 
 # create fn view that does entire CRUD within this one view (for learning purposes only)
 # this view is confusing, purpose is to see logic behind the django classes
