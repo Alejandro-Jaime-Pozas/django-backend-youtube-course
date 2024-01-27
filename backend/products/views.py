@@ -1,4 +1,4 @@
-from rest_framework import generics, mixins
+from rest_framework import generics, mixins, permissions, authentication
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
@@ -13,6 +13,9 @@ from .serializers import ProductSerializer
 class ProductListCreateAPIViews(generics.ListCreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer 
+    # FOR AUTHENTICATION AND PERMISSIONS:
+    authentication_classes = [authentication.SessionAuthentication]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly] # with read only option, it allows for get method but not the other methods
 
     # specific method for CreateAPIView
     def perform_create(self, serializer):
