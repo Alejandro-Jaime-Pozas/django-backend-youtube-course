@@ -14,8 +14,9 @@ class ProductListCreateAPIViews(generics.ListCreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer 
     # FOR AUTHENTICATION AND PERMISSIONS:
-    authentication_classes = [authentication.SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly] # with read only option, it allows for get method but not the other methods
+    authentication_classes = [authentication.SessionAuthentication] # prob checks for a token non expired
+    permission_classes = [permissions.DjangoModelPermissions] # to include default permissions for users (which defaults to no permissions)
+    # permission_classes = [permissions.IsAuthenticatedOrReadOnly] # with read only option, it allows for get method but not the other methods
 
     # specific method for CreateAPIView
     def perform_create(self, serializer):
@@ -58,6 +59,7 @@ class ProductDetailAPIView(generics.RetrieveAPIView):
 class ProductUpdateAPIView(generics.UpdateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer # serializer_class is installed package in rest_framework
+    permission_classes = [permissions.DjangoModelPermissions]
     lookup_field = 'pk' # lookup_field included in UpdateAPIView
 
     # 
