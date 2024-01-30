@@ -6,16 +6,18 @@ from django.shortcuts import get_object_or_404
 
 from .models import Product
 from .serializers import ProductSerializer
+from .permissions import IsStaffEditorPermission
 
 
 
-# LIST CREATE VIEW NOT ONLY LISTS ALL INSTANCES STORED IN DATABASE, ALSO CREATES A MODEL INSTANCE & SERIALIZER INSTANCE
+# GET, POST: LIST CREATE VIEW NOT ONLY LISTS ALL INSTANCES STORED IN DATABASE, ALSO CREATES A MODEL INSTANCE & SERIALIZER INSTANCE
 class ProductListCreateAPIViews(generics.ListCreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer 
     # FOR AUTHENTICATION AND PERMISSIONS:
     authentication_classes = [authentication.SessionAuthentication] # prob checks for a token non expired
-    permission_classes = [permissions.DjangoModelPermissions] # to include default permissions for users (which defaults to no permissions)
+    permission_classes = [permissions.IsAdminUser, IsStaffEditorPermission] # order matters, first make sure user is admin user, then give the user the custom staff editor permission
+    # permission_classes = [permissions.DjangoModelPermissions] # to include default permissions for users (which defaults to no permissions)
     # permission_classes = [permissions.IsAuthenticatedOrReadOnly] # with read only option, it allows for get method but not the other methods
 
     # specific method for CreateAPIView
