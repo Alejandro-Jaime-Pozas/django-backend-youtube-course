@@ -3,6 +3,7 @@ from rest_framework import permissions
 
 class IsStaffEditorPermission(permissions.DjangoModelPermissions):
 
+    # to add user permission types to view/get, add/post, change/put, delete/delete
     perms_map = {
     'GET': ['%(app_label)s.view_%(model_name)s'],
     'OPTIONS': [],
@@ -18,9 +19,9 @@ class IsStaffEditorPermission(permissions.DjangoModelPermissions):
         # if user is not staff, deny access
         if not request.user.is_staff:
             return False 
-        return super().has_permission(request, view) # this is the default permission
+        return super().has_permission(request, view) # this is the default permission check method of parent
     
-    # # this is a basic view for code learning: if user has permission, grant access (but code is granting access even if 1 condition is met for all conditions)
+    # # this is a basic view for code learning: if user has permission, grant access (but code below is granting access even if 1 condition is met for all conditions)
     # def has_permission(self, request, view):
     #     user = request.user
     #     print(user.get_all_permissions())

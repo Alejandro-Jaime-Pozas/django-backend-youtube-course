@@ -19,6 +19,6 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include('api.urls')), # include starts at the current folder level
+    path('api/', include('api.urls')), # include starts at the python project level
     path('api/products/', include('products.urls'))
 ]

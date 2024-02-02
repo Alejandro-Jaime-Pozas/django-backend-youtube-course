@@ -27,7 +27,7 @@ class ProductSerializer(serializers.ModelSerializer):
         return obj.get_discount()
 
 
-
+# # forms.modelForm similar to zerializes in how they are constructed
 # class ProductForm(forms.ModelForm):
 #     class Meta:
 #         model = Product
