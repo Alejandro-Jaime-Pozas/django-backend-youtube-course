@@ -5,14 +5,17 @@ from django.shortcuts import get_object_or_404
 # from django.http import Http404
 
 from api.authentication import TokenAuthentication
+from api.mixins import StaffEditorPermissionMixin
 from .models import Product
 from .serializers import ProductSerializer
-from .permissions import IsStaffEditorPermission
+from api.permissions import IsStaffEditorPermission
 
-
+# MIXINS are a great way to shortcut having to manually copy paste same code into different views
 
 # GET, POST: LIST CREATE VIEW NOT ONLY LISTS ALL INSTANCES STORED IN DATABASE, ALSO CREATES A MODEL INSTANCE & SERIALIZER INSTANCE
-class ProductListCreateAPIViews(generics.ListCreateAPIView):
+class ProductListCreateAPIViews(
+    StaffEditorPermissionMixin, # this mixin allows us to set default permission classes w/o need to set permission_classes within class
+    generics.ListCreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer 
     # # FOR AUTHENTICATION AND PERMISSIONS - DONT NEED THIS IF USING GLOBAL SETTINGS.PY DEFAULT AUTH/PERMISSIONS FOR REST_FRAMEWORK
@@ -20,7 +23,7 @@ class ProductListCreateAPIViews(generics.ListCreateAPIView):
     #     authentication.SessionAuthentication, # prob identifies a live session based on local storage or some time variable
     #     TokenAuthentication, # to require user token
     # ] # prob checks for a token non expired
-    permission_classes = [permissions.IsAdminUser, IsStaffEditorPermission] # order matters, first make sure user is admin user, then give the user the custom staff editor permission
+    # permission_classes = [permissions.IsAdminUser, IsStaffEditorPermission] # order matters, first make sure user is admin user, then give the user the custom staff editor permission
     # permission_classes = [permissions.DjangoModelPermissions] # to include default permissions for users (which defaults to no permissions)
     # permission_classes = [permissions.IsAuthenticatedOrReadOnly] # with read only option, it allows for get method but not the other methods
 
@@ -32,15 +35,17 @@ class ProductListCreateAPIViews(generics.ListCreateAPIView):
         content = serializer.validated_data.get('content') or None 
         if not content:
             content = title 
-        serializer.save(content=content)
+        serializer.save(content=content) # like commit() in flask; why need to specify content=content?
         # serializer.save()
-        # can also send a Django signal
+        # can also send a Django signal ie look into signals
 
 # CREATE VIEW CREATES A MODEL INSTANCE & SERIALIZER INSTANCE
-class ProductCreateAPIViews(generics.CreateAPIView):
+class ProductCreateAPIViews(
+    StaffEditorPermissionMixin,
+    generics.CreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer 
-    permission_classes = [permissions.IsAdminUser, IsStaffEditorPermission]
+    # permission_classes = [permissions.IsAdminUser, IsStaffEditorPermission]
 
     # specific method for CreateAPIView
     def perform_create(self, serializer):
@@ -55,21 +60,25 @@ class ProductCreateAPIViews(generics.CreateAPIView):
         # can also send a Django signal
 
 # DETAIL VIEW GETS ONE SINGLE ITEM
-class ProductDetailAPIView(generics.RetrieveAPIView):
+class ProductDetailAPIView(
+    StaffEditorPermissionMixin,
+    generics.RetrieveAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer # serializer_class is installed package in rest_framework
-    permission_classes = [permissions.IsAdminUser, IsStaffEditorPermission]
+    # permission_classes = [permissions.IsAdminUser, IsStaffEditorPermission]
     # lookup_field = 'pk'
     # # to get a custom queryset 
     # def def get_queryset(self):
     #     return super().get_queryset()
 
-class ProductUpdateAPIView(generics.UpdateAPIView):
+class ProductUpdateAPIView(
+    StaffEditorPermissionMixin,
+    generics.UpdateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer # serializer_class is installed package in rest_framework
     lookup_field = 'pk' # lookup_field included in UpdateAPIView
     # permission_classes = [permissions.DjangoModelPermissions]
-    permission_classes = [permissions.IsAdminUser, IsStaffEditorPermission]
+    # permission_classes = [permissions.IsAdminUser, IsStaffEditorPermission]
 
     # 
     def perform_update(self, serializer):
@@ -79,11 +88,13 @@ class ProductUpdateAPIView(generics.UpdateAPIView):
             ###
 
 
-class ProductDeleteAPIView(generics.DestroyAPIView):
+class ProductDeleteAPIView(
+    StaffEditorPermissionMixin,
+    generics.DestroyAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer # serializer_class is installed package in rest_framework
     lookup_field = 'pk'
-    permission_classes = [permissions.IsAdminUser, IsStaffEditorPermission]
+    # permission_classes = [permissions.IsAdminUser, IsStaffEditorPermission]
     
     def perform_destroy(self, instance): # destroy inputs the instance itself, not the serializer
         # instance

@@ -20,5 +20,6 @@ from django.urls import path, include
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('api.urls')), # include starts at the python project level
-    path('api/products/', include('products.urls'))
+    path('api/products/', include('products.urls')),
+    path('api/v2/', include('cfehome.routers')), # this to see how viewsets work; have GET, PUT, PATCH, POST, DELETE abilities
 ]
