@@ -1,13 +1,8 @@
-class ParentClass:
-    attribute = "Parent attribute"
+def something(*args, **kwargs):
+    
+    def some_else(*args, **kwargs):
+        return args 
+    
+    return some_else(kwargs)
 
-class SubClass(ParentClass):
-    attribute = "Subclass attribute"
-    def __init__(self, ):
-        print(super())
-
-# Creating an instance of SubClass
-instance = SubClass()
-
-# Accessing the attribute
-print(instance.attribute)
+print(something(8,10,6,a=1, b=2, c=3))
