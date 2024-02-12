@@ -2,27 +2,32 @@
 from rest_framework import serializers 
 from rest_framework.reverse import reverse
 from .models import Product 
+from . import validators
 
 
 # like forms but serializers primarily to ease translation to json for api requests
+# serializer no need to update the migrations, you can change fields as you like
 # replaces model_to_dict to clean data for json communication
 class ProductSerializer(serializers.ModelSerializer):
     my_discount = serializers.SerializerMethodField(read_only=True) # this to specify name of my_discount
     edit_url = serializers.SerializerMethodField(read_only=True)
+    title = serializers.CharField(validators=[validators.validate_title_no_hello, validators.unique_product_title]) # runs functions in validators list when attempt to create; not sure if validators built-in or just kwarg
+    name = serializers.CharField(source='title', read_only=True) # source param indicates related field
     # url = serializers.SerializerMethodField(read_only=True) # not the ideal method to reference the product's own url
     url = serializers.HyperlinkedIdentityField( # hyperlink only works on a model serializer, whereas a serializer method field can be referenced anywhere else in class functions 
         view_name='product-detail', 
         lookup_field='pk'
     )
-    email = serializers.EmailField(write_only=True) # will only write to it, not read it
+    # email = serializers.EmailField(write_only=True) # will only write to it, not read it
     class Meta:
         model = Product
         fields = [
             'url',
             'edit_url',
-            'email',
+            # 'email',
             'id',
             'pk',
+            'name',
             'title',
             'content',
             'price',
@@ -30,12 +35,28 @@ class ProductSerializer(serializers.ModelSerializer):
             'my_discount',
         ]
 
-    def create(self, validated_data): # need this to prevent error bc cannot include write field in default serializer; validated_data is assuming the data is validated..
-        # return Product.objects.create(**validated_data)
-        email = validated_data.pop('email')
-        obj = super().create(validated_data)
-        print(email, validated_data)
-        return obj
+    # THIS BELOW IS A SIMPLE VALIDATION OF DATA EXAMPLE WITHIN THE SERIALIZER
+    def validate_title(self, value): # validate_<field_name> is std way to reference a field for validation
+        request = self.context.get('request')
+        user = request.user
+        qs = Product.objects.filter(user=user, title__iexact=value) # <field_name>__exact uses exact character matching when filtering the database
+        if qs.exists():
+            raise serializers.ValidationError(f"{value} is already a product title")
+        return value
+
+    # # THIS COMMENTED OUT SINCE INCLUDED IN VIEWS.PY
+    # def create(self, validated_data): # need this to prevent error bc cannot include write field in default serializer; validated_data is assuming the data is validated..
+    #     # return Product.objects.create(**validated_data)
+    #     # email = validated_data.pop('email') # this to prevent error, since email is a write_only field
+    #     obj = super().create(validated_data)
+    #     # print(email, obj)
+    #     return obj # don't need to save again, django saves automatically
+    
+    # # THIS COMMENTED OUT SINCE INCLUDED IN VIEWS.PY
+    # def update(self, instance, validated_data): # django runs this update method if there is already an instance existing, otherwise runs create()
+    #     email = validated_data.pop('email')
+    #     instance.title = validated_data.get('title')
+    #     return instance # don't need to save again, django saves automatically
 
     def get_edit_url(self, obj): # seems like get_<field_name> is the syntax used to refer to a serializer read_only field that is not in the original db model
         request = self.context.get('request') # can't directly do self.request since serializers don't always have a request, depends on context

@@ -28,9 +28,11 @@ class ProductListCreateAPIViews(
     # permission_classes = [permissions.IsAuthenticatedOrReadOnly] # with read only option, it allows for get method but not the other methods
 
     # specific method for CreateAPIView
-    def perform_create(self, serializer):
+    def perform_create(self, serializer): # this not often the preferred way of modifying create fn
         # serializer.save(user=self.request.user) # if have user, to create serializer instance
         # print(serializer.validated_data) # prints the validated data inputs
+        if serializer.validated_data.get('email'):
+            email = serializer.validated_data.pop('email')
         title = serializer.validated_data.get('title')
         content = serializer.validated_data.get('content') or None 
         if not content:
@@ -110,7 +112,7 @@ class ProductDeleteAPIView(
 class ProductMixinView(
     mixins.ListModelMixin, # for handling get list
     mixins.RetrieveModelMixin, # for handling get 1 item
-    mixins.CreateModelMixin, # for creating get 1 item
+    mixins.CreateModelMixin, # for creating 1 item
     generics.GenericAPIView
     ):
     queryset = Product.objects.all()
