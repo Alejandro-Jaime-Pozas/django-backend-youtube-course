@@ -12,7 +12,7 @@ class ProductSerializer(serializers.ModelSerializer):
     my_discount = serializers.SerializerMethodField(read_only=True) # this to specify name of my_discount
     edit_url = serializers.SerializerMethodField(read_only=True)
     title = serializers.CharField(validators=[validators.validate_title_no_hello, validators.unique_product_title]) # runs functions in validators list when attempt to create; not sure if validators built-in or just kwarg
-    name = serializers.CharField(source='title', read_only=True) # source param indicates related field
+    # name = serializers.CharField(source='user.email', read_only=True) # source param indicates related existing field
     # url = serializers.SerializerMethodField(read_only=True) # not the ideal method to reference the product's own url
     url = serializers.HyperlinkedIdentityField( # hyperlink only works on a model serializer, whereas a serializer method field can be referenced anywhere else in class functions 
         view_name='product-detail', 
@@ -21,13 +21,15 @@ class ProductSerializer(serializers.ModelSerializer):
     # email = serializers.EmailField(write_only=True) # will only write to it, not read it
     class Meta:
         model = Product
+        # must insert fields created above within this class, can also add fields from main model
         fields = [
+            # 'user',
             'url',
             'edit_url',
-            # 'email',
             'id',
             'pk',
-            'name',
+            # 'email',
+            # 'name',
             'title',
             'content',
             'price',
@@ -35,14 +37,14 @@ class ProductSerializer(serializers.ModelSerializer):
             'my_discount',
         ]
 
-    # THIS BELOW IS A SIMPLE VALIDATION OF DATA EXAMPLE WITHIN THE SERIALIZER
-    def validate_title(self, value): # validate_<field_name> is std way to reference a field for validation
-        request = self.context.get('request')
-        user = request.user
-        qs = Product.objects.filter(user=user, title__iexact=value) # <field_name>__exact uses exact character matching when filtering the database
-        if qs.exists():
-            raise serializers.ValidationError(f"{value} is already a product title")
-        return value
+    # # THIS BELOW IS A SIMPLE VALIDATION OF DATA EXAMPLE WITHIN THE SERIALIZER
+    # def validate_title(self, value): # validate_<field_name> is std way to reference a field for validation
+    #     request = self.context.get('request')
+    #     user = request.user
+    #     qs = Product.objects.filter(user=user, title__iexact=value) # <field_name>__exact uses exact character matching when filtering the database
+    #     if qs.exists():
+    #         raise serializers.ValidationError(f"{value} is already a product title")
+    #     return value
 
     # # THIS COMMENTED OUT SINCE INCLUDED IN VIEWS.PY
     # def create(self, validated_data): # need this to prevent error bc cannot include write field in default serializer; validated_data is assuming the data is validated..

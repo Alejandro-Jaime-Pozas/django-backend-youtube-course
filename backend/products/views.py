@@ -5,7 +5,7 @@ from django.shortcuts import get_object_or_404
 # from django.http import Http404
 
 from api.authentication import TokenAuthentication
-from api.mixins import StaffEditorPermissionMixin
+from api.mixins import StaffEditorPermissionMixin, UserQuerySetMixin
 from .models import Product
 from .serializers import ProductSerializer
 from api.permissions import IsStaffEditorPermission
@@ -15,9 +15,11 @@ from api.permissions import IsStaffEditorPermission
 # GET, POST: LIST CREATE VIEW NOT ONLY LISTS ALL INSTANCES STORED IN DATABASE, ALSO CREATES A MODEL INSTANCE & SERIALIZER INSTANCE
 class ProductListCreateAPIViews(
     StaffEditorPermissionMixin, # this mixin allows us to set default permission classes w/o need to set permission_classes within class
+    UserQuerySetMixin,
     generics.ListCreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer 
+    # user_field = 'owner' # testing here if mixin works, should throw error
     # # FOR AUTHENTICATION AND PERMISSIONS - DONT NEED THIS IF USING GLOBAL SETTINGS.PY DEFAULT AUTH/PERMISSIONS FOR REST_FRAMEWORK
     # authentication_classes = [
     #     authentication.SessionAuthentication, # prob identifies a live session based on local storage or some time variable
@@ -37,9 +39,19 @@ class ProductListCreateAPIViews(
         content = serializer.validated_data.get('content') or None 
         if not content:
             content = title 
-        serializer.save(content=content) # like commit() in flask; why need to specify content=content?
+        serializer.save(user=self.request.user, content=content) # like commit() in flask; why need to specify content=content?
         # serializer.save()
         # can also send a Django signal ie look into signals
+
+    # # THIS BELOW IS IN MIXINS.PY IN MAIN API FOLDER
+    # def get_queryset(self, *args, **kwargs):
+    #     qs = super().get_queryset(*args, **kwargs) # returns the queryset for this view
+    #     request = self.request
+    #     user = request.user 
+    #     if not user.is_authenticated:
+    #         return Product.objects.none() # return empty list related to model
+    #     # print(request.user)
+    #     return qs.filter(user=request.user) # checking here that the user attr in Product model = request.user
 
 # CREATE VIEW CREATES A MODEL INSTANCE & SERIALIZER INSTANCE
 class ProductCreateAPIViews(
