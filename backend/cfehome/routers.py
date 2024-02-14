@@ -7,5 +7,5 @@ from products.viewsets import ProductViewSet, ProductGenericViewSet
 router = DefaultRouter()
 # router.register('products', ProductViewSet, basename='products') # register params: endpoint for url; 
 router.register('products', ProductGenericViewSet, basename='products') # register params: endpoint for url; 
-print(router.urls) # without printing no way to see what the actual urls included in DefaultRouter when registered are...
+# print(router.urls) # without printing no way to see what the actual urls included in DefaultRouter when registered are...
 urlpatterns = router.urls 

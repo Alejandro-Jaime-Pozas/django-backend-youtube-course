@@ -15,10 +15,11 @@ from api.permissions import IsStaffEditorPermission
 # GET, POST: LIST CREATE VIEW NOT ONLY LISTS ALL INSTANCES STORED IN DATABASE, ALSO CREATES A MODEL INSTANCE & SERIALIZER INSTANCE
 class ProductListCreateAPIViews(
     StaffEditorPermissionMixin, # this mixin allows us to set default permission classes w/o need to set permission_classes within class
-    UserQuerySetMixin,
+    UserQuerySetMixin, # gets the current user instance
     generics.ListCreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer 
+    # allow_staff_view = True  # you can change your own mixin variables for specific views
     # user_field = 'owner' # testing here if mixin works, should throw error
     # # FOR AUTHENTICATION AND PERMISSIONS - DONT NEED THIS IF USING GLOBAL SETTINGS.PY DEFAULT AUTH/PERMISSIONS FOR REST_FRAMEWORK
     # authentication_classes = [
@@ -56,6 +57,7 @@ class ProductListCreateAPIViews(
 # CREATE VIEW CREATES A MODEL INSTANCE & SERIALIZER INSTANCE
 class ProductCreateAPIViews(
     StaffEditorPermissionMixin,
+    UserQuerySetMixin,
     generics.CreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer 
@@ -76,6 +78,7 @@ class ProductCreateAPIViews(
 # DETAIL VIEW GETS ONE SINGLE ITEM
 class ProductDetailAPIView(
     StaffEditorPermissionMixin,
+    UserQuerySetMixin,
     generics.RetrieveAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer # serializer_class is installed package in rest_framework
@@ -87,6 +90,7 @@ class ProductDetailAPIView(
 
 class ProductUpdateAPIView(
     StaffEditorPermissionMixin,
+    UserQuerySetMixin,
     generics.UpdateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer # serializer_class is installed package in rest_framework
@@ -104,6 +108,7 @@ class ProductUpdateAPIView(
 
 class ProductDeleteAPIView(
     StaffEditorPermissionMixin,
+    UserQuerySetMixin,
     generics.DestroyAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer # serializer_class is installed package in rest_framework
