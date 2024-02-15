@@ -8,11 +8,20 @@ from .models import Product
 from . import validators
 
 
+class ProductInlineSerializer(serializers.Serializer):
+    url = serializers.HyperlinkedIdentityField(
+        view_name='product-detail', 
+        lookup_field='pk',
+        read_only=True
+    )
+    title = serializers.CharField(read_only=True)
+
 # like forms but serializers primarily to ease translation to json for api requests
 # serializer no need to update the migrations, you can change fields as you like
 # replaces model_to_dict to clean data for json communication
 class ProductSerializer(serializers.ModelSerializer):
     owner = UserPublicSerializer(source='user', read_only=True) # readonly is here as well as in other serializer to declare which things you want to be read only
+    related_products = ProductInlineSerializer(source='user.product_set.all', read_only=True, many=True) # for some reason, source does not call the .all() function, just stores the function
     my_user_data = serializers.SerializerMethodField(read_only=True) # not ideal see below
     my_discount = serializers.SerializerMethodField(read_only=True) # this to specify name of my_discount
     edit_url = serializers.SerializerMethodField(read_only=True)
@@ -42,6 +51,7 @@ class ProductSerializer(serializers.ModelSerializer):
             'sale_price',
             'my_discount',
             'my_user_data', # not ideal to display relationship data bw models, best create another serializer
+            'related_products'
         ]
 
     # obj when creating methods is the original instance from the related model to the serializer, in this case a Product instance 

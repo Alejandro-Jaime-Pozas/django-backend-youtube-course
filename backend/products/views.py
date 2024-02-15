@@ -15,7 +15,7 @@ from api.permissions import IsStaffEditorPermission
 # GET, POST: LIST CREATE VIEW NOT ONLY LISTS ALL INSTANCES STORED IN DATABASE, ALSO CREATES A MODEL INSTANCE & SERIALIZER INSTANCE
 class ProductListCreateAPIViews(
     StaffEditorPermissionMixin, # this mixin allows us to set default permission classes w/o need to set permission_classes within class
-    UserQuerySetMixin, # gets the current user instance
+    UserQuerySetMixin, # gets the current user instance to narrow down query base
     generics.ListCreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer 
