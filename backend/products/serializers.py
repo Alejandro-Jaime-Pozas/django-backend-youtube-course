@@ -1,6 +1,9 @@
 # from django import forms 
 from rest_framework import serializers 
 from rest_framework.reverse import reverse
+
+from api.serializers import UserPublicSerializer
+
 from .models import Product 
 from . import validators
 
@@ -9,6 +12,8 @@ from . import validators
 # serializer no need to update the migrations, you can change fields as you like
 # replaces model_to_dict to clean data for json communication
 class ProductSerializer(serializers.ModelSerializer):
+    owner = UserPublicSerializer(source='user', read_only=True) # readonly is here as well as in other serializer to declare which things you want to be read only
+    my_user_data = serializers.SerializerMethodField(read_only=True) # not ideal see below
     my_discount = serializers.SerializerMethodField(read_only=True) # this to specify name of my_discount
     edit_url = serializers.SerializerMethodField(read_only=True)
     title = serializers.CharField(validators=[validators.validate_title_no_hello, validators.unique_product_title]) # runs functions in validators list when attempt to create; not sure if validators built-in or just kwarg
@@ -18,12 +23,13 @@ class ProductSerializer(serializers.ModelSerializer):
         view_name='product-detail', 
         lookup_field='pk'
     )
+    # email = serializers.EmailField(source='user.email', read_only=True) # will only write to it, not read it
     # email = serializers.EmailField(write_only=True) # will only write to it, not read it
     class Meta:
         model = Product
         # must insert fields created above within this class, can also add fields from main model
         fields = [
-            # 'user',
+            'owner',
             'url',
             'edit_url',
             'id',
@@ -35,7 +41,15 @@ class ProductSerializer(serializers.ModelSerializer):
             'price',
             'sale_price',
             'my_discount',
+            'my_user_data', # not ideal to display relationship data bw models, best create another serializer
         ]
+
+    # obj when creating methods is the original instance from the related model to the serializer, in this case a Product instance 
+        
+    def get_my_user_data(self, obj): # obj is an instance of the model that the serializer references
+        return {
+            "username": obj.user.username
+        }
 
     # # THIS BELOW IS A SIMPLE VALIDATION OF DATA EXAMPLE WITHIN THE SERIALIZER
     # def validate_title(self, value): # validate_<field_name> is std way to reference a field for validation
