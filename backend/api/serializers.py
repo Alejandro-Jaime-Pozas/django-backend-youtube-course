@@ -1,3 +1,4 @@
+# this would normally go in a specific django app created for users
 from rest_framework import serializers 
 
 class UserProductInlineSerializer(serializers.Serializer):
@@ -8,7 +9,7 @@ class UserProductInlineSerializer(serializers.Serializer):
     )
     title = serializers.CharField(read_only=True)
 
-
+# if regular serializers.Serializer, don't need to include class: Meta, model or fields
 class UserPublicSerializer(serializers.Serializer):
     username = serializers.CharField(read_only=True)
     id = serializers.IntegerField(read_only=True)

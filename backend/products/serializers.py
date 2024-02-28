@@ -20,10 +20,11 @@ class ProductInlineSerializer(serializers.Serializer):
 # serializer no need to update the migrations, you can change fields as you like
 # replaces model_to_dict to clean data for json communication
 class ProductSerializer(serializers.ModelSerializer):
-    owner = UserPublicSerializer(source='user', read_only=True) # readonly is here as well as in other serializer to declare which things you want to be read only
-    related_products = ProductInlineSerializer(source='user.product_set.all', read_only=True, many=True) # for some reason, source does not call the .all() function, just stores the function
-    my_user_data = serializers.SerializerMethodField(read_only=True) # not ideal see below
-    my_discount = serializers.SerializerMethodField(read_only=True) # this to specify name of my_discount
+    # you can insert related field
+    owner = UserPublicSerializer(source='user', read_only=True) # source='user' comes from the model; this owner field is meant to replace the typical 'user' field which would only return the user_id; readonly is here as well as in other serializer to declare which things you want to be read only; 
+    # related_products = ProductInlineSerializer(source='user.product_set.all', read_only=True, many=True) # for some reason, source does not call the .all() function, just stores the function
+    # my_user_data = serializers.SerializerMethodField(read_only=True) # not ideal see below
+    # my_discount = serializers.SerializerMethodField(read_only=True) # this to specify name of my_discount
     edit_url = serializers.SerializerMethodField(read_only=True)
     title = serializers.CharField(validators=[validators.validate_title_no_hello, validators.unique_product_title]) # runs functions in validators list when attempt to create; not sure if validators built-in or just kwarg
     # name = serializers.CharField(source='user.email', read_only=True) # source param indicates related existing field
@@ -42,16 +43,17 @@ class ProductSerializer(serializers.ModelSerializer):
             'url',
             'edit_url',
             'id',
-            'pk',
-            # 'email',
-            # 'name',
+            # 'pk',
             'title',
             'content',
             'price',
             'sale_price',
-            'my_discount',
-            'my_user_data', # not ideal to display relationship data bw models, best create another serializer
-            'related_products'
+            # 'user',
+            # 'email',
+            # 'name',
+            # 'my_discount',
+            # 'my_user_data', # not ideal to display relationship data bw models, best create another serializer
+            # 'related_products' # for visual purposes to view user's products
         ]
 
     # obj when creating methods is the original instance from the related model to the serializer, in this case a Product instance 
@@ -60,6 +62,7 @@ class ProductSerializer(serializers.ModelSerializer):
         return {
             "username": obj.user.username
         }
+    
 
     # # THIS BELOW IS A SIMPLE VALIDATION OF DATA EXAMPLE WITHIN THE SERIALIZER
     # def validate_title(self, value): # validate_<field_name> is std way to reference a field for validation
